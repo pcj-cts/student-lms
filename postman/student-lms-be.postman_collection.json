@@ -1,0 +1,737 @@
+{
+  "info": {
+    "name": "Student LMS Backend",
+    "description": "All 8 service endpoints with chained variables. Run folder 00 first to register + login the three personas (admin, instructor, student). Then exercise the services in any order — tokens and IDs are auto-extracted into collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 — Setup (run first)",
+      "item": [
+        {
+          "name": "0.1 Register Admin",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.userId) pm.collectionVariables.set('adminId', r.userId);"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"{{adminUsername}}\",\n  \"password\": \"{{adminPassword}}\",\n  \"email\": \"{{adminEmail}}\",\n  \"role\": \"ADMIN\"\n}"},
+            "url": {"raw": "http://{{host}}:8081/api/v1/auth/register","protocol": "http","host": ["{{host}}"],"port": "8081","path": ["api","v1","auth","register"]}
+          }
+        },
+        {
+          "name": "0.2 Register Instructor",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.userId) pm.collectionVariables.set('instructorId', r.userId);"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"{{instructorUsername}}\",\n  \"password\": \"{{instructorPassword}}\",\n  \"email\": \"{{instructorEmail}}\",\n  \"role\": \"INSTRUCTOR\"\n}"},
+            "url": {"raw": "http://{{host}}:8081/api/v1/auth/register","protocol": "http","host": ["{{host}}"],"port": "8081","path": ["api","v1","auth","register"]}
+          }
+        },
+        {
+          "name": "0.3 Register Student",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.userId) pm.collectionVariables.set('studentId', r.userId);"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"{{studentUsername}}\",\n  \"password\": \"{{studentPassword}}\",\n  \"email\": \"{{studentEmail}}\",\n  \"role\": \"STUDENT\"\n}"},
+            "url": {"raw": "http://{{host}}:8081/api/v1/auth/register","protocol": "http","host": ["{{host}}"],"port": "8081","path": ["api","v1","auth","register"]}
+          }
+        },
+        {
+          "name": "0.4 Login Admin",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.accessToken) {","  pm.collectionVariables.set('adminToken', r.accessToken);","  pm.collectionVariables.set('adminRefreshToken', r.refreshToken);","  if (r.userId) pm.collectionVariables.set('adminId', r.userId);","}"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"},
+            "url": {"raw": "http://{{host}}:8081/api/v1/auth/login","protocol": "http","host": ["{{host}}"],"port": "8081","path": ["api","v1","auth","login"]}
+          }
+        },
+        {
+          "name": "0.5 Login Instructor",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.accessToken) {","  pm.collectionVariables.set('instructorToken', r.accessToken);","  pm.collectionVariables.set('instructorRefreshToken', r.refreshToken);","  if (r.userId) pm.collectionVariables.set('instructorId', r.userId);","}"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"{{instructorEmail}}\",\n  \"password\": \"{{instructorPassword}}\"\n}"},
+            "url": {"raw": "http://{{host}}:8081/api/v1/auth/login","protocol": "http","host": ["{{host}}"],"port": "8081","path": ["api","v1","auth","login"]}
+          }
+        },
+        {
+          "name": "0.6 Login Student",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.accessToken) {","  pm.collectionVariables.set('studentToken', r.accessToken);","  pm.collectionVariables.set('studentRefreshToken', r.refreshToken);","  if (r.userId) pm.collectionVariables.set('studentId', r.userId);","}"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}"},
+            "url": {"raw": "http://{{host}}:8081/api/v1/auth/login","protocol": "http","host": ["{{host}}"],"port": "8081","path": ["api","v1","auth","login"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 — Auth Service (8081)",
+      "item": [
+        {
+          "name": "Refresh student token",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.accessToken) {","  pm.collectionVariables.set('studentToken', r.accessToken);","  pm.collectionVariables.set('studentRefreshToken', r.refreshToken);","}"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"refreshToken\": \"{{studentRefreshToken}}\"\n}"},
+            "url": {"raw": "http://{{host}}:8081/api/v1/auth/refresh","protocol": "http","host": ["{{host}}"],"port": "8081","path": ["api","v1","auth","refresh"]}
+          }
+        },
+        {
+          "name": "Logout student",
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"refreshToken\": \"{{studentRefreshToken}}\"\n}"},
+            "url": {"raw": "http://{{host}}:8081/api/v1/auth/logout","protocol": "http","host": ["{{host}}"],"port": "8081","path": ["api","v1","auth","logout"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 — User Service (8082)",
+      "item": [
+        {
+          "name": "Get own profile (Student)",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8082/api/v1/users/{{studentId}}","protocol": "http","host": ["{{host}}"],"port": "8082","path": ["api","v1","users","{{studentId}}"]}
+          }
+        },
+        {
+          "name": "Update own profile (Student)",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"username\": \"john_doe_updated\",\n  \"email\": \"john.updated@lms.com\"\n}"},
+            "url": {"raw": "http://{{host}}:8082/api/v1/users/{{studentId}}","protocol": "http","host": ["{{host}}"],"port": "8082","path": ["api","v1","users","{{studentId}}"]}
+          }
+        },
+        {
+          "name": "[Admin] List users",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8082/api/v1/admin/users?role=STUDENT&active=true&size=20","protocol": "http","host": ["{{host}}"],"port": "8082","path": ["api","v1","admin","users"],"query": [{"key": "role","value": "STUDENT"},{"key": "active","value": "true"},{"key": "size","value": "20"},{"key": "search","value": "","disabled": true}]}
+          }
+        },
+        {
+          "name": "[Admin] Get user by id",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8082/api/v1/admin/users/{{studentId}}","protocol": "http","host": ["{{host}}"],"port": "8082","path": ["api","v1","admin","users","{{studentId}}"]}
+          }
+        },
+        {
+          "name": "[Admin] Change role",
+          "request": {
+            "method": "PATCH",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"role\": \"INSTRUCTOR\"\n}"},
+            "url": {"raw": "http://{{host}}:8082/api/v1/admin/users/{{studentId}}/role","protocol": "http","host": ["{{host}}"],"port": "8082","path": ["api","v1","admin","users","{{studentId}}","role"]}
+          }
+        },
+        {
+          "name": "[Admin] Deactivate user",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8082/api/v1/admin/users/{{studentId}}","protocol": "http","host": ["{{host}}"],"port": "8082","path": ["api","v1","admin","users","{{studentId}}"]}
+          }
+        },
+        {
+          "name": "[Admin] Reactivate user",
+          "request": {
+            "method": "PATCH",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8082/api/v1/admin/users/{{studentId}}/reactivate","protocol": "http","host": ["{{host}}"],"port": "8082","path": ["api","v1","admin","users","{{studentId}}","reactivate"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 — Course Service (8083)",
+      "item": [
+        {
+          "name": "[Public] List published courses",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses?category=Backend&difficulty=BEGINNER&size=20","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses"],"query": [{"key": "category","value": "Backend"},{"key": "difficulty","value": "BEGINNER"},{"key": "size","value": "20"},{"key": "search","value": "","disabled": true},{"key": "instructorId","value": "","disabled": true},{"key": "maxPrice","value": "","disabled": true}]}
+          }
+        },
+        {
+          "name": "[Public] Get course by id",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor] Create course (DRAFT)",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.courseId) pm.collectionVariables.set('courseId', r.courseId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"Spring Boot Fundamentals\",\n  \"description\": \"Learn Spring Boot from scratch — controllers, services, JPA, security.\",\n  \"category\": \"Backend\",\n  \"difficulty\": \"BEGINNER\",\n  \"price\": 0.00,\n  \"duration\": 12\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses"]}
+          }
+        },
+        {
+          "name": "[Instructor] Update course",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"description\": \"Updated description — now covers Spring Boot 3.x specifically.\",\n  \"duration\": 15\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor] Submit course for approval",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"action\": \"SUBMIT\"\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}/publish","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}","publish"]}
+          }
+        },
+        {
+          "name": "[Admin] Approve course",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"action\": \"APPROVE\"\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}/publish","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}","publish"]}
+          }
+        },
+        {
+          "name": "[Admin] Reject course (PENDING → DRAFT)",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"action\": \"REJECT\"\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}/publish","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}","publish"]}
+          }
+        },
+        {
+          "name": "[Owner/Admin] Archive course",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}"]}
+          }
+        },
+        {
+          "name": "[Admin] Restore archived course",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"action\": \"RESTORE\"\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}/publish","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}","publish"]}
+          }
+        },
+        {
+          "name": "List modules in course",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}/modules","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}","modules"]}
+          }
+        },
+        {
+          "name": "[Instructor] Create module",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.moduleId) pm.collectionVariables.set('moduleId', r.moduleId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"courseId\": {{courseId}},\n  \"title\": \"Getting Started\",\n  \"orderIndex\": 0\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/modules","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","modules"]}
+          }
+        },
+        {
+          "name": "[Instructor] Update module",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"Getting Started (Revised)\",\n  \"orderIndex\": 1\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/modules/{{moduleId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","modules","{{moduleId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor] Delete module",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8083/api/v1/modules/{{moduleId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","modules","{{moduleId}}"]}
+          }
+        },
+        {
+          "name": "List lessons in module",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8083/api/v1/modules/{{moduleId}}/lessons","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","modules","{{moduleId}}","lessons"]}
+          }
+        },
+        {
+          "name": "[Instructor] Create lesson",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.lessonId) pm.collectionVariables.set('lessonId', r.lessonId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"moduleId\": {{moduleId}},\n  \"title\": \"Hello Spring\",\n  \"contentType\": \"TEXT\",\n  \"contentUrl\": \"https://example.com/lessons/hello-spring.md\",\n  \"duration\": null,\n  \"orderIndex\": 0\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/lessons","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","lessons"]}
+          }
+        },
+        {
+          "name": "[Instructor] Update lesson",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"Hello Spring (v2)\",\n  \"contentType\": \"VIDEO\",\n  \"contentUrl\": \"https://example.com/lessons/hello-spring.mp4\",\n  \"duration\": 12\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/lessons/{{lessonId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","lessons","{{lessonId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor] Delete lesson",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8083/api/v1/lessons/{{lessonId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","lessons","{{lessonId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor] Post announcement",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.announcementId) pm.collectionVariables.set('announcementId', r.announcementId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"Welcome to the course\",\n  \"body\": \"Lecture 1 is now available. Submissions for the first quiz are due in 7 days.\",\n  \"pinned\": true\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}/announcements","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}","announcements"]}
+          }
+        },
+        {
+          "name": "List announcements",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8083/api/v1/courses/{{courseId}}/announcements","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","courses","{{courseId}}","announcements"]}
+          }
+        },
+        {
+          "name": "[Instructor] Update announcement",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"Welcome to the course (updated)\",\n  \"pinned\": false\n}"},
+            "url": {"raw": "http://{{host}}:8083/api/v1/announcements/{{announcementId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","announcements","{{announcementId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor] Delete announcement",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8083/api/v1/announcements/{{announcementId}}","protocol": "http","host": ["{{host}}"],"port": "8083","path": ["api","v1","announcements","{{announcementId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 — Enrolment Service (8084)",
+      "item": [
+        {
+          "name": "[Student] Enrol in course",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.enrollmentId) pm.collectionVariables.set('enrollmentId', r.enrollmentId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"courseId\": {{courseId}},\n  \"paymentToken\": null\n}"},
+            "url": {"raw": "http://{{host}}:8084/api/v1/enrollments","protocol": "http","host": ["{{host}}"],"port": "8084","path": ["api","v1","enrollments"]}
+          }
+        },
+        {
+          "name": "[Student/Admin] List a student's enrolments",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8084/api/v1/enrollments?student_id={{studentId}}","protocol": "http","host": ["{{host}}"],"port": "8084","path": ["api","v1","enrollments"],"query": [{"key": "student_id","value": "{{studentId}}"}]}
+          }
+        },
+        {
+          "name": "[Instructor/Admin] List course roster",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8084/api/v1/enrollments?course_id={{courseId}}","protocol": "http","host": ["{{host}}"],"port": "8084","path": ["api","v1","enrollments"],"query": [{"key": "course_id","value": "{{courseId}}"}]}
+          }
+        },
+        {
+          "name": "[Student/Admin] Unenrol",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8084/api/v1/enrollments/{{enrollmentId}}","protocol": "http","host": ["{{host}}"],"port": "8084","path": ["api","v1","enrollments","{{enrollmentId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 — Assessment Service (8085)",
+      "item": [
+        {
+          "name": "List course assessments",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8085/api/v1/assessments?course_id={{courseId}}","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","assessments"],"query": [{"key": "course_id","value": "{{courseId}}"}]}
+          }
+        },
+        {
+          "name": "Get assessment by id",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8085/api/v1/assessments/{{assessmentId}}","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","assessments","{{assessmentId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor] Create quiz (with 3 questions)",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.assessmentId) pm.collectionVariables.set('assessmentId', r.assessmentId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"courseId\": {{courseId}},\n  \"title\": \"Week 1 Quiz\",\n  \"type\": \"QUIZ\",\n  \"maxScore\": 100.00,\n  \"timeLimitMinutes\": 30,\n  \"maxAttempts\": 2,\n  \"questions\": [\n    {\n      \"questionId\": 1,\n      \"type\": \"MCQ\",\n      \"prompt\": \"Which Spring annotation marks a REST controller?\",\n      \"options\": [\"@Service\", \"@RestController\", \"@Component\", \"@Bean\"],\n      \"correctAnswer\": \"@RestController\"\n    },\n    {\n      \"questionId\": 2,\n      \"type\": \"TRUE_FALSE\",\n      \"prompt\": \"Spring Boot requires a web.xml file.\",\n      \"options\": null,\n      \"correctAnswer\": \"false\"\n    },\n    {\n      \"questionId\": 3,\n      \"type\": \"SHORT_ANSWER\",\n      \"prompt\": \"Describe the role of @Transactional in 1-2 sentences.\",\n      \"options\": null,\n      \"correctAnswer\": null\n    }\n  ]\n}"},
+            "url": {"raw": "http://{{host}}:8085/api/v1/assessments","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","assessments"]}
+          }
+        },
+        {
+          "name": "[Instructor] Create assignment",
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"courseId\": {{courseId}},\n  \"title\": \"Term Paper\",\n  \"type\": \"ASSIGNMENT\",\n  \"maxScore\": 100.00,\n  \"timeLimitMinutes\": null,\n  \"maxAttempts\": 1,\n  \"questions\": []\n}"},
+            "url": {"raw": "http://{{host}}:8085/api/v1/assessments","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","assessments"]}
+          }
+        },
+        {
+          "name": "[Instructor] Update assessment",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"Week 1 Quiz (Revised)\",\n  \"timeLimitMinutes\": 45,\n  \"maxAttempts\": 3\n}"},
+            "url": {"raw": "http://{{host}}:8085/api/v1/assessments/{{assessmentId}}","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","assessments","{{assessmentId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor] Delete assessment",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8085/api/v1/assessments/{{assessmentId}}","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","assessments","{{assessmentId}}"]}
+          }
+        },
+        {
+          "name": "[Student] Request upload URL (for assignments)",
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8085/api/v1/submissions/upload-url?assessmentId={{assessmentId}}&filename=essay.pdf","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","submissions","upload-url"],"query": [{"key": "assessmentId","value": "{{assessmentId}}"},{"key": "filename","value": "essay.pdf"}]}
+          }
+        },
+        {
+          "name": "[Student] Submit quiz answers",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.submissionId) pm.collectionVariables.set('submissionId', r.submissionId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"assessmentId\": {{assessmentId}},\n  \"answers\": [\n    {\"questionId\": 1, \"answer\": \"@RestController\"},\n    {\"questionId\": 2, \"answer\": \"false\"},\n    {\"questionId\": 3, \"answer\": \"It marks a method or class so Spring wraps invocations in a transaction.\"}\n  ],\n  \"fileUrl\": null\n}"},
+            "url": {"raw": "http://{{host}}:8085/api/v1/submissions","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","submissions"]}
+          }
+        },
+        {
+          "name": "[Student] Submit assignment (with fileUrl)",
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"assessmentId\": {{assessmentId}},\n  \"answers\": null,\n  \"fileUrl\": \"https://lms-submissions.s3.amazonaws.com/students/42/assessments/15/essay.pdf\"\n}"},
+            "url": {"raw": "http://{{host}}:8085/api/v1/submissions","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","submissions"]}
+          }
+        },
+        {
+          "name": "Get submission by id",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8085/api/v1/submissions/{{submissionId}}","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","submissions","{{submissionId}}"]}
+          }
+        },
+        {
+          "name": "[Instructor/Admin] List submissions for assessment",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8085/api/v1/submissions?assessment_id={{assessmentId}}","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","submissions"],"query": [{"key": "assessment_id","value": "{{assessmentId}}"}]}
+          }
+        },
+        {
+          "name": "[Instructor] Grade submission (step 1 of 2)",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"score\": 88.0,\n  \"feedback\": \"Good work on the theory section; revisit the @Transactional question.\"\n}"},
+            "url": {"raw": "http://{{host}}:8085/api/v1/submissions/{{submissionId}}/grade","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","submissions","{{submissionId}}","grade"]}
+          }
+        },
+        {
+          "name": "[Instructor] Release grade (step 2 of 2)",
+          "request": {
+            "method": "PATCH",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{instructorToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8085/api/v1/submissions/{{submissionId}}/release","protocol": "http","host": ["{{host}}"],"port": "8085","path": ["api","v1","submissions","{{submissionId}}","release"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 — Progress Service (8086)",
+      "item": [
+        {
+          "name": "Get progress detail",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress?student_id={{studentId}}&course_id={{courseId}}","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress"],"query": [{"key": "student_id","value": "{{studentId}}"},{"key": "course_id","value": "{{courseId}}"}]}
+          }
+        },
+        {
+          "name": "[Student] Mark lesson complete",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"enrollmentId\": {{enrollmentId}},\n  \"lessonId\": {{lessonId}}\n}"},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/lesson-complete","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","lesson-complete"]}
+          }
+        },
+        {
+          "name": "[Student] Create note",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.noteId) pm.collectionVariables.set('noteId', r.noteId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"enrollmentId\": {{enrollmentId}},\n  \"lessonId\": {{lessonId}},\n  \"videoTimestampSeconds\": 120,\n  \"body\": \"Watch from 2:00 — the @Transactional example is the key insight.\"\n}"},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/notes","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","notes"]}
+          }
+        },
+        {
+          "name": "[Student] List notes for lesson",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/notes?enrollment_id={{enrollmentId}}&lesson_id={{lessonId}}","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","notes"],"query": [{"key": "enrollment_id","value": "{{enrollmentId}}"},{"key": "lesson_id","value": "{{lessonId}}"}]}
+          }
+        },
+        {
+          "name": "[Student] Update note",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"body\": \"Updated — the @Transactional behaviour around checked exceptions is tricky.\"\n}"},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/notes/{{noteId}}","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","notes","{{noteId}}"]}
+          }
+        },
+        {
+          "name": "[Student] Delete note",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/notes/{{noteId}}","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","notes","{{noteId}}"]}
+          }
+        },
+        {
+          "name": "[Student] Create bookmark",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.bookmarkId) pm.collectionVariables.set('bookmarkId', r.bookmarkId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"enrollmentId\": {{enrollmentId}},\n  \"lessonId\": {{lessonId}},\n  \"videoTimestampSeconds\": 60,\n  \"label\": \"Definition of @Transactional\"\n}"},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/bookmarks","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","bookmarks"]}
+          }
+        },
+        {
+          "name": "[Student] List bookmarks for lesson",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/bookmarks?enrollment_id={{enrollmentId}}&lesson_id={{lessonId}}","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","bookmarks"],"query": [{"key": "enrollment_id","value": "{{enrollmentId}}"},{"key": "lesson_id","value": "{{lessonId}}"}]}
+          }
+        },
+        {
+          "name": "[Student] Update bookmark",
+          "request": {
+            "method": "PUT",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"label\": \"Definition of @Transactional (renamed)\"\n}"},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/bookmarks/{{bookmarkId}}","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","bookmarks","{{bookmarkId}}"]}
+          }
+        },
+        {
+          "name": "[Student] Delete bookmark",
+          "request": {
+            "method": "DELETE",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8086/api/v1/progress/bookmarks/{{bookmarkId}}","protocol": "http","host": ["{{host}}"],"port": "8086","path": ["api","v1","progress","bookmarks","{{bookmarkId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 — Notification Service (8087)",
+      "item": [
+        {
+          "name": "[Student] List my preferences",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8087/api/v1/students/{{studentId}}/preferences","protocol": "http","host": ["{{host}}"],"port": "8087","path": ["api","v1","students","{{studentId}}","preferences"]}
+          }
+        },
+        {
+          "name": "[Student] Get effective preferences for a course",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8087/api/v1/students/{{studentId}}/preferences/effective?course_id={{courseId}}","protocol": "http","host": ["{{host}}"],"port": "8087","path": ["api","v1","students","{{studentId}}","preferences","effective"],"query": [{"key": "course_id","value": "{{courseId}}"}]}
+          }
+        },
+        {
+          "name": "[Student] Upsert preferences (global)",
+          "request": {
+            "method": "PATCH",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"courseId\": null,\n  \"emailEnabled\": true,\n  \"inAppEnabled\": true\n}"},
+            "url": {"raw": "http://{{host}}:8087/api/v1/students/{{studentId}}/preferences","protocol": "http","host": ["{{host}}"],"port": "8087","path": ["api","v1","students","{{studentId}}","preferences"]}
+          }
+        },
+        {
+          "name": "[Student] Upsert preferences (per course — turn off email)",
+          "request": {
+            "method": "PATCH",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{studentToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"courseId\": {{courseId}},\n  \"emailEnabled\": false,\n  \"inAppEnabled\": true\n}"},
+            "url": {"raw": "http://{{host}}:8087/api/v1/students/{{studentId}}/preferences","protocol": "http","host": ["{{host}}"],"port": "8087","path": ["api","v1","students","{{studentId}}","preferences"]}
+          }
+        },
+        {
+          "name": "[Admin] Dispatch notification (simulates SNS arrival)",
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"type\": \"GRADE_RELEASED\",\n  \"recipientStudentId\": {{studentId}},\n  \"courseId\": {{courseId}},\n  \"payload\": {\n    \"submissionId\": 301,\n    \"assessmentTitle\": \"Week 1 Quiz\",\n    \"score\": 88.0,\n    \"maxScore\": 100.0,\n    \"feedback\": \"Good work on the theory section.\"\n  }\n}"},
+            "url": {"raw": "http://{{host}}:8087/api/v1/admin/notifications/dispatch","protocol": "http","host": ["{{host}}"],"port": "8087","path": ["api","v1","admin","notifications","dispatch"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 — Logging Service (8088)",
+      "item": [
+        {
+          "name": "[Admin] List logs (default size 50)",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8088/api/v1/admin/logs?eventType=LOGIN&actorId={{studentId}}&from=2026-01-01T00:00:00Z&to=2027-01-01T00:00:00Z&size=50","protocol": "http","host": ["{{host}}"],"port": "8088","path": ["api","v1","admin","logs"],"query": [{"key": "eventType","value": "LOGIN"},{"key": "actorId","value": "{{studentId}}"},{"key": "from","value": "2026-01-01T00:00:00Z"},{"key": "to","value": "2027-01-01T00:00:00Z"},{"key": "size","value": "50"}]}
+          }
+        },
+        {
+          "name": "[Admin] Get log by id",
+          "request": {
+            "method": "GET",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "url": {"raw": "http://{{host}}:8088/api/v1/admin/logs/{{logId}}","protocol": "http","host": ["{{host}}"],"port": "8088","path": ["api","v1","admin","logs","{{logId}}"]}
+          }
+        },
+        {
+          "name": "[Admin] Write log entry",
+          "event": [{"listen": "test","script": {"type": "text/javascript","exec": ["const r = pm.response.json();","if (r && r.logId) pm.collectionVariables.set('logId', r.logId);"]}}],
+          "request": {
+            "method": "POST",
+            "auth": {"type": "bearer","bearer": [{"key": "token","value": "{{adminToken}}","type": "string"}]},
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"description\": \"Smoke test entry from Postman\",\n  \"eventType\": \"LOGIN\",\n  \"actorId\": {{studentId}}\n}"},
+            "url": {"raw": "http://{{host}}:8088/api/v1/admin/logs","protocol": "http","host": ["{{host}}"],"port": "8088","path": ["api","v1","admin","logs"]}
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "host", "value": "localhost"},
+    {"key": "adminUsername", "value": "admin1"},
+    {"key": "adminEmail", "value": "admin@lms.com"},
+    {"key": "adminPassword", "value": "Admin1234!"},
+    {"key": "adminId", "value": ""},
+    {"key": "adminToken", "value": ""},
+    {"key": "adminRefreshToken", "value": ""},
+    {"key": "instructorUsername", "value": "prof_jane"},
+    {"key": "instructorEmail", "value": "jane@lms.com"},
+    {"key": "instructorPassword", "value": "Prof1234!"},
+    {"key": "instructorId", "value": ""},
+    {"key": "instructorToken", "value": ""},
+    {"key": "instructorRefreshToken", "value": ""},
+    {"key": "studentUsername", "value": "john_doe"},
+    {"key": "studentEmail", "value": "john@lms.com"},
+    {"key": "studentPassword", "value": "Student1234!"},
+    {"key": "studentId", "value": ""},
+    {"key": "studentToken", "value": ""},
+    {"key": "studentRefreshToken", "value": ""},
+    {"key": "courseId", "value": ""},
+    {"key": "moduleId", "value": ""},
+    {"key": "lessonId", "value": ""},
+    {"key": "assessmentId", "value": ""},
+    {"key": "submissionId", "value": ""},
+    {"key": "enrollmentId", "value": ""},
+    {"key": "noteId", "value": ""},
+    {"key": "bookmarkId", "value": ""},
+    {"key": "announcementId", "value": ""},
+    {"key": "logId", "value": ""}
+  ]
+}
